@@ -1,5 +1,4 @@
 /*----- constants -----*/
-console.log('the js is loaded')
 
 //This lookup will be used to populate the board with the corresponding color
 const lookup = {
@@ -21,15 +20,82 @@ const winningCombinations = [
 
 /*----- app's state (variables) -----*/
 
-//this board constant represents our gameboard, with each element representing a cell on the board
-const board = [null, null, null, null, null, null, null, null, null]
-
-let turn = 1
+//Board constant represents our gameboard, with each element representing a cell on the board
+//Winner value will dictate whether there is a winner or not
+//Turn value determines who's turn it is
+let board, winner, turn;
 
 /*----- cached element references -----*/
 const tableEl = document.querySelector('table')
-console.log(tableEl)
+
+const headerEl = document.querySelector('h1')
+
+const squares = document.querySelectorAll('td div')
+
+const buttonEl = document.querySelector('button')
 
 /*----- event listeners -----*/
 
+buttonEl.addEventListener('click', init)
+
 /*----- functions -----*/
+//Calling init function will start our game 
+init()  
+function init() {
+    board = [null, null, null, null, null, null, null, null, null]
+    tableEl.addEventListener('click', handleTurn)
+    turn = 1;
+    winner = null;
+    render()
+}
+
+function render() {
+    headerEl.innerText = lookup[turn] + "'s turn"
+
+    //forEach has access to the index number of the current element in the iteration
+    board.forEach(function(tile, idx)
+    {
+        squares[idx].style.background = lookup[tile]
+    })
+    // Check if a winning message needs to be displayed
+    if(winner === "tie"){
+        headerEl.innerText = "It's a tie"
+    } else if(winner) {
+        headerEl.innerText = lookup[winner] + " has won this game"
+    }
+}
+
+//This function will use the winning combinations to check if either player has made a winning combo
+function checkWin() {
+    winningCombinations.forEach(function(combo){
+        // if (board[combo[0]] + board[combo[1]] + board[combo[2]] === 3) 
+        // {
+        //     winner = turn
+        // }
+        // else if (board[combo[0]] + board[combo[1]] + board[combo[2]] === -3)
+        // {
+        //     winner = turn
+        // }
+        // Shorter way of writing the above code
+        if (Math.abs(board[combo[0]] + board[combo[1]] + board[combo[2]] === 3))
+        {
+            winner = turn
+            tableEl.removeEventListener('click', handleTurn)
+        }
+        if(!winner && !board.includes(null))
+        {
+            winner = 'tie'
+        }
+})}
+
+function handleTurn(evt) {
+    const idx = evt.target.id.replace('sq', '')
+    if(!board[idx])
+    {
+    board[idx] = turn
+    checkWin()
+    turn *= -1
+    render()
+    }
+}
+
